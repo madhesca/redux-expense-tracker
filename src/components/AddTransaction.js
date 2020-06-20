@@ -1,26 +1,31 @@
 import React, { useState, useContext } from "react";
-import { GlobalContext } from "../context/GlobalState";
+import { connect } from "react-redux";
+import { addItem } from "../redux/globalActions";
+//import { GlobalContext } from "../context/GlobalState";
 
-function AddTransaction() {
+function AddTransaction({ addItem, transactions }) {
+  // const { addItem, transactions } = useContext(GlobalContext);
+
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
-  const { addTransaction } = useContext(GlobalContext);
 
+  localStorage.setItem("items", JSON.stringify(transactions));
   const submitHandler = e => {
     e.preventDefault();
 
     if ((text !== "" && amount > 0) || amount < 0) {
-      const newTrans = {
+      const newItem = {
         id: Math.random(),
         text,
         amount: +amount
       };
+      console.log(newItem);
 
-      addTransaction(newTrans);
+      addItem(newItem);
       setText("");
       setAmount("");
     } else {
-      alert("Wrong Format");
+      alert("wrong");
     }
   };
 
@@ -30,14 +35,14 @@ function AddTransaction() {
       <form onSubmit={submitHandler}>
         <div className="form-control">
           <label htmlFor="text">Text</label>
-          <input value={text} onChange={e => setText(e.target.value)} type="text" id="text" placeholder="Enter text..." />
+          <input type="text" placeholder="Enter text..." value={text} onChange={e => setText(e.target.value)} />
         </div>
         <div className="form-control">
           <label htmlFor="amount">
             Amount <br />
             (negative - expense, positive - income)
           </label>
-          <input value={amount} onChange={e => setAmount(e.target.value)} type="text" placeholder="Enter amount..." />
+          <input type="text" placeholder="Enter amount..." value={amount} onChange={e => setAmount(e.target.value)} />
         </div>
         <button className="btn">Add transaction</button>
       </form>
@@ -45,4 +50,14 @@ function AddTransaction() {
   );
 }
 
-export default AddTransaction;
+const mapStateToProps = ({ transactions: { transactions } }) => {
+  return {
+    transactions
+  };
+};
+
+const mapDispatchToProps = dispatch => ({
+  addItem: transaction => dispatch(addItem(transaction))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddTransaction);
